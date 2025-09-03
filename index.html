@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube MP3 İndirici</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .input-group {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .url-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .url-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+            background: white;
+        }
+
+        .convert-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .convert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .convert-btn:active {
+            transform: translateY(0);
+        }
+
+        .convert-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .error {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+        }
+
+        .download-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            background: white;
+            color: #333;
+            transform: translateY(-2px);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .feature {
+            padding: 20px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .feature-desc {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 YouTube MP3 İndirici</h1>
+        <p class="subtitle">YouTube videolarını kolayca MP3 formatına çevirin</p>
+        
+        <div class="input-group">
+            <input type="text" class="url-input" id="youtubeUrl" placeholder="YouTube video URL'sini buraya yapıştırın...">
+        </div>
+        
+        <button class="convert-btn" id="convertBtn" onclick="convertToMp3()">
+            🚀 MP3'e Çevir
+        </button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px;">Video işleniyor...</p>
+        </div>
+        
+        <div class="result" id="result">
+            <!-- Sonuç buraya gelecek -->
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <div class="feature-title">Hızlı Dönüşüm</div>
+                <div class="feature-desc">Saniyeler içinde MP3'e çevir</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🎧</div>
+                <div class="feature-title">Yüksek Kalite</div>
+                <div class="feature-desc">320kbps kalitede ses</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔒</div>
+                <div class="feature-title">Güvenli</div>
+                <div class="feature-desc">Dosyalar kaydedilmez</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💯</div>
+                <div class="feature-title">Ücretsiz</div>
+                <div class="feature-desc">Tamamen bedava kullanım</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function isValidYouTubeUrl(url) {
+            const patterns = [
+                /^https?:\/\/(www\.)?youtube\.com\/watch\?v=[\w-]+/,
+                /^https?:\/\/(www\.)?youtu\.be\/[\w-]+/,
+                /^https?:\/\/(www\.)?youtube\.com\/embed\/[\w-]+/,
+                /^https?:\/\/(www\.)?m\.youtube\.com\/watch\?v=[\w-]+/
+            ];
+            return patterns.some(pattern => pattern.test(url));
+        }
+
+        function extractVideoId(url) {
+            const patterns = [
+                /[?&]v=([^&#]*)/,
+                /youtu\.be\/([^?&#]*)/,
+                /embed\/([^?&#]*)/
+            ];
+            
+            for (let pattern of patterns) {
+                const match = url.match(pattern);
+                if (match) return match[1];
+            }
+            return null;
+        }
+
+        function showResult(type, message, downloadUrl = null) {
+            const result = document.getElementById('result');
+            result.className = `result ${type}`;
+            result.style.display = 'block';
+            
+            if (type === 'success' && downloadUrl) {
+                result.innerHTML = `
+                    <h3>✅ Dönüşüm Başarılı!</h3>
+                    <p>${message}</p>
+                    <a href="${downloadUrl}" class="download-btn" download>📥 MP3 İndir</a>
+                `;
+            } else {
+                result.innerHTML = `<p>${message}</p>`;
+            }
+        }
+
+        function convertToMp3() {
+            const urlInput = document.getElementById('youtubeUrl');
+            const convertBtn = document.getElementById('convertBtn');
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                showResult('error', '⚠️ Lütfen YouTube video URL\'sini girin!');
+                return;
+            }
+            
+            if (!isValidYouTubeUrl(url)) {
+                showResult('error', '❌ Geçerli bir YouTube URL\'si girin! Örnek: https://www.youtube.com/watch?v=...');
+                return;
+            }
+            
+            // UI durumunu güncelle
+            convertBtn.disabled = true;
+            convertBtn.textContent = 'İşleniyor...';
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            // Simülasyon - gerçek uygulamada backend API'ye istek gönderilir
+            const videoId = extractVideoId(url);
+            
+            setTimeout(() => {
+                // Rastgele başarı/hata simülasyonu
+                const success = Math.random() > 0.2; // %80 başarı oranı
+                
+                loading.style.display = 'none';
+                convertBtn.disabled = false;
+                convertBtn.textContent = '🚀 MP3\'e Çevir';
+                
+                if (success) {
+                    // Simüle edilmiş indirme URL'si
+                    const downloadUrl = `#download-${videoId}-${Date.now()}`;
+                    showResult('success', 'Video başarıyla MP3 formatına çevrildi!', downloadUrl);
+                } else {
+                    showResult('error', '❌ Dönüşüm sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+                }
+            }, 2000 + Math.random() * 3000); // 2-5 saniye arası simülasyon
+        }
+        
+        // Enter tuşu ile dönüşüm başlatma
+        document.getElementById('youtubeUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                convertToMp3();
+            }
+        });
+        
+        // URL yapıştırıldığında otomatik temizleme
+        document.getElementById('youtubeUrl').addEventListener('paste', function(e) {
+            setTimeout(() => {
+                const url = e.target.value.trim();
+                if (url && !isValidYouTubeUrl(url)) {
+                    showResult('error', '⚠️ Geçerli bir YouTube URL\'si yapıştırın!');
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>
